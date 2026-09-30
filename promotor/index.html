@@ -35,7 +35,7 @@
     <div class="brand">Batería<b>CVU</b></div>
     <section id="gate">
       <h1>Promotor</h1>
-      <p class="muted">Entrá con tu usuario, por ejemplo Promotor01. No es un correo. La persona entrevistada no tiene cuenta.</p>
+      <p class="muted">Entrá con tu usuario, por ejemplo Promotor01, y tu contraseña. La persona entrevistada no tiene cuenta.</p>
       <form class="panel" id="loginForm" novalidate>
         <label>Usuario<input id="username" name="username" type="text" inputmode="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Promotor01" required></label>
         <label>Contraseña<input id="password" name="password" type="password" autocomplete="current-password" required></label>
@@ -165,7 +165,7 @@
       $("loginError").textContent = "";
       if (!db) { $("loginError").textContent = "Falta la configuración."; return; }
       const typed = $("username").value.trim();
-      if (typed.includes("@")) { $("loginError").textContent = "Ese campo es el usuario del promotor, no un correo."; return; }
+      if (typed.includes("@")) { $("loginError").textContent = "Escribí el usuario, por ejemplo Promotor01."; return; }
       const account = `${typed.toLowerCase()}@users.bateria-cvu.invalid`;
       const { data, error } = await db.auth.signInWithPassword({ email: account, password: $("password").value });
       if (error || !data.session) { $("loginError").textContent = "Usuario o contraseña incorrectos."; return; }
