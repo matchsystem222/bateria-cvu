@@ -1,0 +1,10 @@
+project_id = "pvyxznkbsfnoyhhccner"
+
+[functions.didit-session]
+verify_jwt = true
+
+[functions.didit-webhook]
+verify_jwt = false
+
+[functions.promoter-admin]
+verify_jwt = true

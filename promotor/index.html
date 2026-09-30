@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Onboarding · Batería CVU</title>
+  <style>
+    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17243a;background:#f3f6fa}
+    *{box-sizing:border-box}body{margin:0}button,input{font:inherit}button{cursor:pointer}
+    .wrap{width:min(560px,100%);margin:auto;padding:22px 16px 48px}
+    .brand{font-size:20px;font-weight:800;letter-spacing:-.5px;color:#10243c}.brand b{color:#0d9f78}
+    h1{font-size:28px;letter-spacing:-.8px;margin:8px 0 6px}
+    .muted{color:#718197;font-size:14px;line-height:1.45}
+    .panel{background:#fff;border:1px solid #e3eaf1;border-radius:18px;padding:18px;box-shadow:0 8px 30px #24405b08;margin-top:16px}
+    label{display:grid;gap:6px;font-size:12px;font-weight:800;color:#53667c;margin-top:12px}
+    input{border:1px solid #dce5ee;border-radius:10px;padding:12px;width:100%}
+    .primary{border:0;background:#0d9f78;color:#fff;padding:14px 16px;border-radius:12px;font-weight:800;width:100%;margin-top:14px}
+    .primary:disabled{opacity:.5}
+    .secondary{border:1px solid #dce5ee;background:#fff;color:#26394d;padding:12px 14px;border-radius:12px;font-weight:700}
+    .error{color:#b03636;font-size:13px;min-height:18px;margin-top:8px}
+    .case{border-top:1px solid #eef2f5;padding:14px 0}
+    .case:first-child{border-top:0}
+    .row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .name{font-weight:800}
+    .pill{font-size:11px;font-weight:800;border-radius:100px;padding:5px 8px;white-space:nowrap}
+    .ok{background:#edf7f3;color:#0b8d65}.wait{background:#fff6db;color:#a57500}.bad{background:#fdecec;color:#b43535}.run{background:#eef3f8;color:#3d5670}
+    .why{margin:8px 0 0;padding:0;color:#5c7085;font-size:13px}
+    .why li{margin:4px 0}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="brand">Batería<b>CVU</b></div>
+    <section id="gate">
+      <h1>Onboarding</h1>
+      <p class="muted">Acompañás a la persona en la entrevista. Acá solo ves el nombre y si quedó válido para crear una CVU.</p>
+      <form class="panel" id="loginForm">
+        <label>Correo<input id="email" type="email" autocomplete="username" required></label>
+        <label>Contraseña<input id="password" type="password" autocomplete="current-password" required></label>
+        <div class="error" id="loginError"></div>
+        <button class="primary" type="submit">Entrar</button>
+      </form>
+    </section>
+    <section id="app" class="hidden">
+      <div class="row" style="margin-top:14px">
+        <h1 style="margin:0">Entrevistas</h1>
+        <button class="secondary" id="signOut" type="button">Salir</button>
+      </div>
+      <p class="muted">La ficha queda en la batería hasta que se cree la CVU. En el listado solo ves el nombre y si pasó.</p>
+      <button class="primary" id="start" type="button">Nueva entrevista</button>
+      <form class="panel hidden" id="confirmForm">
+        <div class="eyebrow" style="font-size:12px;font-weight:800;letter-spacing:.08em;color:#65768e">CONFIRMAR DATOS</div>
+        <p class="muted">Revisá lo que leyó el documento. Si el nombre o el DNI quedaron cortados, corregilos antes de terminar.</p>
+        <label>Nombre<input id="firstName" autocomplete="off" required></label>
+        <label>Apellido<input id="lastName" autocomplete="off" required></label>
+        <label>DNI<input id="dni" inputmode="numeric" autocomplete="off" required></label>
+        <div class="error" id="confirmError"></div>
+        <button class="primary" type="submit">Confirmar y guardar en la batería</button>
+      </form>
+      <div class="error" id="appError"></div>
+      <div class="panel" id="list"></div>
+    </section>
+  </main>
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+    const cfg = window.BATERIA_CONFIG || {};
+    const db = cfg.url && cfg.anonKey ? createClient(cfg.url, cfg.anonKey) : null;
+    const $ = (id) => document.getElementById(id);
+    const labels = {
+      Approved: ["Válido para crear CVU", "ok"],
+      "In Review": ["En revisión", "wait"],
+      Declined: ["No es válido", "bad"],
+      Resubmitted: ["Hay que repetir la captura", "bad"],
+      Abandoned: ["No terminó", "wait"],
+      Expired: ["Venció sin empezar", "wait"],
+      "Kyc Expired": ["El KYC venció", "wait"],
+      "Not Started": ["Sin empezar", "run"],
+      "In Progress": ["En curso", "run"]
+    };
+
+    function verdict(status) {
+      return labels[status] || ["En curso", "run"];
+    }
+
+    function esc(value) {
+      return String(value).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+    }
+
+    function row(item) {
+      const pending = !item.confirmed_at;
+      const [text, kind] = pending ? ["Falta confirmar", "wait"] : (item.apt_for_cvu ? ["Válido para crear CVU", "ok"] : verdict(item.didit_status));
+      const name = [item.first_name, item.last_name].filter(Boolean).join(" ") || "Sin nombre todavía";
+      const reasons = (item.failure_reasons || []).map((reason) => `<li>${esc(reason)}</li>`).join("");
+      const retry = ["Declined", "Resubmitted", "Abandoned", "Expired", "Kyc Expired"].includes(item.didit_status)
+        ? `<button class="secondary" data-retry="${item.id}" type="button" style="margin-top:8px">Repetir captura</button>` : "";
+      const fix = pending ? `<button class="secondary" data-confirm="${item.id}" type="button" style="margin-top:8px">Corregir datos</button>` : "";
+      return `<article class="case"><div class="row"><div class="name">${esc(name)}</div><span class="pill ${kind}">${esc(text)}</span></div>${reasons ? `<ul class="why">${reasons}</ul>` : ""}${fix}${retry}</article>`;
+    }
+
+    async function openConfirm(caseId) {
+      const { data, error } = await db.rpc("capture_preview", { p_case: caseId });
+      if (error) { $("appError").textContent = error.message; return; }
+      if (data.confirmed) { $("confirmForm").classList.add("hidden"); return; }
+      $("confirmForm").dataset.case = caseId;
+      $("firstName").value = data.first_name || "";
+      $("lastName").value = data.last_name || "";
+      $("dni").value = data.document_number || "";
+      $("confirmError").textContent = "";
+      $("confirmForm").classList.remove("hidden");
+      $("confirmForm").scrollIntoView({ behavior: "smooth" });
+    }
+
+    async function load() {
+      const { data, error } = await db.from("onboarding_cases").select("id, first_name, last_name, didit_status, apt_for_cvu, failure_reasons, confirmed_at, created_at").order("created_at", { ascending: false });
+      if (error) { $("appError").textContent = error.message; return; }
+      $("list").innerHTML = (data || []).map(row).join("") || `<p class="muted">Todavía no hay entrevistas.</p>`;
+    }
+
+    async function begin(caseId) {
+      $("appError").textContent = "";
+      $("start").disabled = true;
+      const { data: sessionData } = await db.auth.getSession();
+      const token = sessionData.session?.access_token;
+      const response = await fetch(`${cfg.url}/functions/v1/didit-session`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, apikey: cfg.anonKey, "Content-Type": "application/json" },
+        body: JSON.stringify(caseId ? { case_id: caseId } : {})
+      });
+      const payload = await response.json().catch(() => ({}));
+      $("start").disabled = false;
+      if (!response.ok || !payload.url) { $("appError").textContent = payload.error || "No se pudo abrir Didit"; return; }
+      location.href = payload.url;
+    }
+
+    async function showApp() {
+      const { data: promoter, error } = await db.from("promoters").select("email").maybeSingle();
+      if (error || !promoter) {
+        $("loginError").textContent = "Esta cuenta no es de un promotor.";
+        await db.auth.signOut();
+        return;
+      }
+      $("gate").classList.add("hidden");
+      $("app").classList.remove("hidden");
+      await load();
+      const caseId = new URLSearchParams(location.search).get("case");
+      if (caseId) {
+        for (let i = 0; i < 20; i++) {
+          await load();
+          const { data } = await db.from("onboarding_cases").select("didit_status").eq("id", caseId).maybeSingle();
+          if (data && !["Not Started", "In Progress"].includes(data.didit_status)) { await openConfirm(caseId); break; }
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+        }
+      }
+    }
+
+    $("loginForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      $("loginError").textContent = "";
+      if (!db) { $("loginError").textContent = "Falta la configuración."; return; }
+      const { data, error } = await db.auth.signInWithPassword({ email: $("email").value.trim(), password: $("password").value });
+      if (error || !data.session) { $("loginError").textContent = error?.message || "No se pudo entrar"; return; }
+      await showApp();
+    });
+    $("signOut").addEventListener("click", async () => { await db.auth.signOut(); location.href = location.pathname; });
+    $("start").addEventListener("click", () => begin());
+    $("confirmForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      $("confirmError").textContent = "";
+      const { error } = await db.rpc("confirm_capture", {
+        p_case: $("confirmForm").dataset.case,
+        p_first: $("firstName").value,
+        p_last: $("lastName").value,
+        p_dni: $("dni").value
+      });
+      if (error) { $("confirmError").textContent = error.message; return; }
+      $("confirmForm").classList.add("hidden");
+      $("dni").value = "";
+      await load();
+    });
+    $("list").addEventListener("click", (event) => {
+      const retry = event.target?.dataset?.retry;
+      const confirmId = event.target?.dataset?.confirm;
+      if (retry) begin(retry);
+      if (confirmId) openConfirm(confirmId);
+    });
+
+    if (!db) $("loginError").textContent = "Falta la configuración.";
+    else {
+      const { data } = await db.auth.getSession();
+      if (data.session) await showApp();
+    }
+  </script>
+  <script src="../config.js"></script>
+</body>
+</html>

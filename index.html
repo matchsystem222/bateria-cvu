@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Batería CVU</title>
+  <style>
+    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17243a;background:#f3f6fa}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}.app{display:grid;grid-template-columns:238px 1fr;min-height:100vh}.side{background:#10243c;color:#c8d5e5;padding:28px 18px}.brand{font-size:21px;font-weight:800;color:#fff;letter-spacing:-.6px;margin:0 10px 38px}.brand b{color:#5ee4b0}.nav{padding:13px 16px;border-radius:11px;margin:5px 0;font-size:14px}.nav.active{background:#25415f;color:#fff;font-weight:700}.side small{display:block;margin:38px 14px;color:#8fa5ba;line-height:1.5}.main{padding:30px clamp(22px,4vw,62px);max-width:1650px;width:100%;margin:auto}header{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:27px}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;color:#65768e;text-transform:uppercase}.title{font-size:30px;letter-spacing:-1px;margin:5px 0 3px}.muted{color:#718197;font-size:14px}.badge{padding:9px 12px;background:#e8f9f1;color:#087b57;border-radius:100px;font-size:12px;font-weight:800;white-space:nowrap}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.card,.panel{background:#fff;border:1px solid #e3eaf1;border-radius:18px;box-shadow:0 8px 30px #24405b08}.card{padding:21px}.card .label{color:#718197;font-size:13px}.card .value{font-size:26px;font-weight:800;letter-spacing:-1px;margin-top:10px}.card .sub{font-size:12px;color:#8b9ab0;margin-top:7px}.workspace{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(340px,.85fr);gap:18px;margin-top:18px}.panel{padding:22px}.panel h2{font-size:18px;margin:0 0 6px;letter-spacing:-.4px}.headrow{display:flex;justify-content:space-between;align-items:center;gap:12px}.tools{display:flex;gap:8px;margin:18px 0 13px}input,select{border:1px solid #dce5ee;border-radius:10px;padding:11px 12px;background:#fff;color:#1c2b40;outline:none;min-width:0}input:focus,select:focus{border-color:#2b9d84;box-shadow:0 0 0 3px #2b9d8420}.tools input{flex:1}.tools select{width:150px}.tablewrap{overflow:auto;max-height:560px}table{width:100%;border-collapse:collapse;font-size:13px;text-align:left}th{position:sticky;top:0;background:#f8fafc;color:#77889e;font-size:11px;text-transform:uppercase;letter-spacing:.07em;padding:12px 11px}td{padding:13px 11px;border-bottom:1px solid #eef2f5;white-space:nowrap}td strong{font-size:13px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#23b980;margin-right:7px}.dot.off{background:#c5cfdb}.money{font-weight:750}.bar{height:5px;width:92px;background:#e9eff3;border-radius:9px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:#27be91;border-radius:9px}.right{display:flex;flex-direction:column;gap:18px}.primary{border:0;background:#0d9f78;color:#fff;padding:12px 17px;border-radius:10px;font-weight:800}.primary:hover{background:#087f61}.primary:disabled{opacity:.45;cursor:not-allowed}.secondary{border:1px solid #dce5ee;background:#fff;color:#26394d;padding:10px 13px;border-radius:10px;font-weight:700}.fields{display:grid;gap:12px;margin-top:18px}.fields label{font-size:12px;font-weight:800;color:#53667c;display:grid;gap:6px}.fields input,.fields select{width:100%}.hint{font-size:12px;color:#72859a;line-height:1.5}.preview{background:#f1f8f6;border:1px solid #d7eee6;border-radius:13px;padding:15px;margin:16px 0}.preview strong{display:block;font-size:19px;margin:5px 0}.preview .line{display:flex;justify-content:space-between;font-size:12px;margin:7px 0;color:#4c6570}.error{color:#b03636;font-size:12px;line-height:1.4;min-height:18px}.runs{max-height:330px;overflow:auto;margin-top:15px}.run{border-top:1px solid #edf1f5;padding:13px 0}.run:first-child{border-top:0}.runhead{display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:750}.runmeta{font-size:12px;color:#8493a5;margin-top:5px}.status{font-size:11px;font-weight:800;border-radius:100px;padding:4px 8px;background:#edf7f3;color:#0b8d65}.status.pending{background:#fff6db;color:#a57500}.status.partial{background:#fff0e8;color:#b05a22}.status.failed{background:#fdecec;color:#b43535}.detail{padding:10px 12px;margin-top:8px;background:#f8fafc;border-radius:9px;font-size:11px;color:#5c7085}.detail div{display:flex;justify-content:space-between;padding:3px 0;gap:8px}.disclaimer{font-size:12px;color:#8a98a9;margin-top:16px;line-height:1.5}.empty{color:#9aaabd;font-size:13px;padding:22px 0}
+    .nav{display:block;width:100%;border:0;background:transparent;color:inherit;text-align:left}.nav:hover,.nav:focus-visible{background:#25415f;color:#fff}.view-hidden{display:none!important}.card.receiver-balance{background:#e8f8ee;border-color:#bce9cd}.card.receiver-balance .label,.card.receiver-balance .value{color:#087a45}.card.receiver-balance .sub{color:#367c5b}.card.payer-balance{background:#fff0dc;border-color:#ffd49a}.card.payer-balance .label,.card.payer-balance .value{color:#aa5707}.card.payer-balance .sub{color:#9b6a35}.account-stack{display:flex;flex-direction:column;gap:18px;min-width:0}.account-stack .tablewrap{max-height:300px}.account-stack #receiverCard .tablewrap{max-height:370px}.workspace.single{display:block}.workspace.single .right{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.workspace.accounts-view .right{display:none}.workspace.promoters-view{display:block}.workspace.promoters-view .right{display:none}
+    .gate{min-height:100vh;display:grid;place-items:center;padding:24px}.gate .panel{width:min(420px,100%)}.who{font-size:12px;color:#8fa5ba;margin:18px 14px 0}
+    @media(max-width:1100px){.grid{grid-template-columns:repeat(2,1fr)}.workspace{grid-template-columns:1fr}.right{display:grid;grid-template-columns:1fr 1fr;align-items:start}}
+    @media(max-width:720px){.app{display:block}.side{padding:15px 20px}.brand{margin:0}.nav,.side small,.who{display:none}.main{padding:20px}.title{font-size:25px}header{align-items:flex-start}.grid,.right{grid-template-columns:1fr}.workspace{display:block}.right{display:flex;margin-top:18px}.tools{flex-wrap:wrap}.tools select{width:100%}.side{display:flex;align-items:center;gap:6px;overflow:auto}.brand{font-size:18px;white-space:nowrap;margin-right:10px}.nav{display:block;white-space:nowrap;width:auto;padding:9px 11px;font-size:12px;margin:0}.workspace.single .right{display:flex;flex-direction:column}.workspace.single .right>.panel{width:100%}}
+  </style>
+</head>
+<body>
+<div id="gate" class="gate">
+  <section class="panel">
+    <div class="eyebrow">Admin</div>
+    <h1 class="title">Batería CVU</h1>
+    <p class="muted">Solo entra el administrador. El libro vive en Supabase.</p>
+    <div class="fields">
+      <label>Correo<input id="email" type="email" autocomplete="username" value="matchsystem@proton.me"></label>
+      <label>Contraseña<input id="password" type="password" autocomplete="current-password"></label>
+    </div>
+    <div class="error" id="loginError"></div>
+    <button class="primary" id="signIn" style="width:100%;margin-top:8px">Entrar</button>
+    <button class="secondary" id="signUp" style="width:100%;margin-top:8px">Crear el acceso de admin</button>
+    <p class="hint">El alta solo concede admin a matchsystem@proton.me. El resto no ve cuentas ni órdenes.</p>
+  </section>
+</div>
+<div class="app view-hidden" id="app">
+  <aside class="side">
+    <div class="brand">Batería<b>CVU</b></div>
+    <button class="nav active" data-view="overview" aria-current="page">Vista general</button>
+    <button class="nav" data-view="accounts">Cuentas CVU</button>
+    <button class="nav" data-view="orders">Órdenes de pago</button>
+    <button class="nav" data-view="reconciliation">Conciliación</button>
+    <button class="nav" data-view="promoters">Promotores</button>
+    <div class="who" id="who"></div>
+    <button class="secondary" id="signOut" style="margin:8px 14px">Salir</button>
+    <small>Libro del admin<br>Cada CVU es independiente</small>
+  </aside>
+  <main class="main">
+    <header>
+      <div>
+        <div class="eyebrow">Tesorería · ARS</div>
+        <h1 class="title" id="viewTitle">CVU independientes en una vista</h1>
+        <div class="muted" id="viewSubtitle">1.000 CVU · saldos individuales hasta $500.000 · sin cuenta agrupadora</div>
+      </div>
+      <span class="badge">Admin</span>
+    </header>
+    <section class="grid" id="overviewCards">
+      <div class="card"><div class="label">Suma visual de saldos</div><div class="value" id="total">—</div><div class="sub">No es una cuenta ni un fondo común</div></div>
+      <div class="card receiver-balance"><div class="label">Saldo de CVU receptoras</div><div class="value" id="receiverTotal">—</div><div class="sub">700 cuentas · reciben ingresos y fondean pagadoras</div></div>
+      <div class="card payer-balance"><div class="label">Saldo de CVU pagadoras</div><div class="value" id="payerTotal">—</div><div class="sub">300 cuentas · emiten pagos externos</div></div>
+      <div class="card"><div class="label">Órdenes registradas</div><div class="value" id="orders">0</div><div class="sub">En el libro de Supabase</div></div>
+    </section>
+    <div class="workspace" id="workspace">
+      <div class="account-stack" id="accountPanel">
+        <section class="panel" id="payerCard">
+          <div class="headrow"><div><h2>CVU pagadoras</h2><div class="muted">300 cuentas · pagos externos</div></div><button class="secondary" id="reset">Reiniciar libro</button></div>
+          <div class="tools"><input id="search" placeholder="Buscar por número de cuenta o CVU…"><select id="filter"><option value="all">Todos los saldos</option><option value="active">Con saldo</option><option value="empty">Sin saldo</option></select></div>
+          <div class="tablewrap"><table><thead><tr><th>Cuenta</th><th>CVU</th><th>Saldo disponible</th><th>Estado</th></tr></thead><tbody id="payerRows"></tbody></table></div>
+          <div class="disclaimer" id="payerShown"></div>
+        </section>
+        <section class="panel" id="receiverCard">
+          <div class="headrow"><div><h2>CVU receptoras</h2><div class="muted">700 cuentas · ingresos y fondeo a pagadoras</div></div></div>
+          <div class="tablewrap" style="margin-top:18px"><table><thead><tr><th>Cuenta</th><th>CVU</th><th>Saldo disponible</th><th>Estado</th></tr></thead><tbody id="receiverRows"></tbody></table></div>
+          <div class="disclaimer" id="receiverShown"></div>
+        </section>
+      </div>
+      <section class="panel view-hidden" id="promoterPanel">
+        <div class="eyebrow">Onboarding</div>
+        <h2>Alta de promotor</h2>
+        <p class="muted">El promotor solo ve nombre, veredicto y motivo. El expediente queda en el servidor.</p>
+        <div class="fields">
+          <label>Correo del promotor<input id="promoterEmail" type="email" autocomplete="off"></label>
+          <label>Contraseña inicial<input id="promoterPassword" type="password" autocomplete="new-password"></label>
+        </div>
+        <div class="error" id="promoterError"></div>
+        <button class="primary" id="addPromoter" style="margin-top:12px">Crear promotor</button>
+        <div class="runs" id="promoterList"></div>
+      </section>
+      <div class="right">
+        <section class="panel" id="paymentPanel">
+          <div class="eyebrow">Nueva orden</div>
+          <h2>Pagos directos desde CVU</h2>
+          <div class="muted">Cada CVU origina su propia transferencia al destino externo.</div>
+          <div class="fields">
+            <label>Destino<select id="type"><option value="CVU">CVU externa</option><option value="CBU">CBU externa</option></select></label>
+            <label>CVU o CBU de destino<input id="destination" inputmode="numeric" maxlength="22" placeholder="22 dígitos"></label>
+            <label>Titular o referencia del beneficiario<input id="beneficiary" maxlength="70" placeholder="Ej. Proveedor Andino SA"></label>
+            <label>Importe neto al beneficiario, en pesos<input id="amount" inputmode="numeric" value="2.300.000" placeholder="Ej. 2.300.000"></label>
+            <label>Costo por transferencia, en pesos<input id="fee" inputmode="numeric" value="250" placeholder="Ej. 250"></label>
+          </div>
+          <div class="preview">
+            <div class="eyebrow">Vista previa</div>
+            <strong id="previewAmount">$0</strong>
+            <div class="line"><span>CVU necesarias</span><b id="sourceCount">0</b></div>
+            <div class="line"><span>Transferencias directas</span><b id="transferCount">0</b></div>
+            <div class="line"><span>Costo total</span><b id="totalFees">$0</b></div>
+            <div class="line"><span>Débito total de las CVU</span><b id="totalDebit">$0</b></div>
+            <div class="line"><span>Suma visual restante</span><b id="remaining">—</b></div>
+            <div id="planParts" class="detail"></div>
+            <div class="line"><span>Total neto al destino</span><b id="partsTotal">$0</b></div>
+            <button class="secondary" id="reroll" style="margin-top:8px;width:100%">Generar otra selección</button>
+          </div>
+          <div class="error" id="error"></div>
+          <button class="primary" id="pay" style="width:100%">Registrar orden</button>
+          <div class="hint" style="margin-top:12px">Cada tramo muestra su importe, costo y débito. El libro descuenta cada CVU por su cuenta. Esto no envía el pago a un banco.</div>
+        </section>
+        <section class="panel" id="fundingPanel">
+          <div class="headrow"><div><h2>Fondeo entre grupos</h2><div class="muted">Transferencia directa de una receptora a una pagadora.</div></div></div>
+          <button class="secondary" id="fund" style="margin-top:14px;width:100%">Registrar fondeo de $75.000</button>
+          <div class="hint" id="fundMessage" style="margin-top:10px">Sin asignación permanente entre cuentas.</div>
+        </section>
+        <section class="panel" id="eventsPanel">
+          <div class="headrow"><div><h2>Avisos al controlador</h2><div class="muted">Cada CVU informa ingresos y egresos.</div></div><button class="secondary" id="incoming">Registrar ingreso</button></div>
+          <div id="events" class="runs"><div class="empty">Esperando movimientos de las CVU.</div></div>
+        </section>
+        <section class="panel" id="ordersPanel">
+          <div class="headrow"><div><h2>Actividad de pagos</h2><div class="muted">Estado de la orden y de cada tramo.</div></div></div>
+          <div id="runs" class="runs"><div class="empty">Todavía no hay órdenes.</div></div>
+        </section>
+      </div>
+    </div>
+    <p class="disclaimer">La suma de saldos es solo informativa: no existe una cuenta agrupadora. Los fondeos son transferencias directas, con origen, destino y referencia. Cada cuenta debita su pago y su costo. Este panel no está conectado a CORE, IQ ni a la red de pagos.</p>
+  </main>
+</div>
+<script src="config.js"></script>
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+
+const MAX = 500000;
+const $ = (id) => document.getElementById(id);
+const money = (n) => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const cfg = window.BATERIA_CONFIG || {};
+const db = cfg.url && cfg.anonKey ? createClient(cfg.url, cfg.anonKey) : null;
+
+let accounts = [];
+let orders = [];
+let events = [];
+let currentPlan = null;
+let pending = false;
+
+function byId(id) { return accounts.find((a) => a.id === id); }
+
+function allocation(amount, fee) {
+  if (amount > 0 && amount < 100000) {
+    const eligible = accounts.filter((a) => a.group === "payer" && a.balance > 200000 && a.balance >= amount + fee);
+    const a = eligible[Math.floor(Math.random() * eligible.length)];
+    return a ? { parts: [{ id: a.id, cvu: a.cvu, amount, fee, status: "Pendiente" }], left: 0 } : { parts: [], left: amount };
+  }
+  let left = amount;
+  const parts = [];
+  const pool = accounts.filter((a) => a.group === "payer" && a.balance > fee);
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  for (const a of pool) {
+    if (left <= 0) break;
+    const cap = Math.min(a.balance - fee, left);
+    let value = left <= a.balance - fee ? left : Math.max(1, Math.floor(cap * (0.55 + Math.random() * 0.45)));
+    if (value % 1000 === 0 && value > 1) value--;
+    parts.push({ id: a.id, cvu: a.cvu, amount: value, fee, status: "Pendiente" });
+    left -= value;
+  }
+  if (left > 0) {
+    for (const p of parts) {
+      if (left <= 0) break;
+      const room = byId(p.id).balance - fee - p.amount;
+      const add = Math.min(room, left);
+      p.amount += add;
+      left -= add;
+    }
+  }
+  for (const p of parts) {
+    if (p.amount % 1000 !== 0) continue;
+    const other = parts.find((x) => x !== p && x.amount > 1 && (x.amount - 1) % 1000 !== 0);
+    if (other && p.amount < byId(p.id).balance - fee) { p.amount++; other.amount--; }
+    else if (other && p.amount > 1 && other.amount < byId(other.id).balance - fee && (other.amount + 1) % 1000 !== 0) { p.amount--; other.amount++; }
+  }
+  return { parts: parts.filter((p) => p.amount > 0), left };
+}
+
+function pesos(id) {
+  const raw = $(id).value.trim().replace(/[\s.$]/g, "");
+  return /^\d+$/.test(raw) ? Number(raw) : NaN;
+}
+function amountValue() { return pesos("amount") || 0; }
+function feeValue() { return pesos("fee"); }
+
+function renderEvents() {
+  $("events").innerHTML = events.length
+    ? events.slice(0, 20).map((e) => `<div class="run"><div class="runhead"><span>CVU ${String(e.account).padStart(4, "0")} · ${escapeHtml(e.direction)}</span><span class="status ${e.status === "Pendiente" ? "pending" : e.status === "Rechazado" ? "failed" : ""}">${escapeHtml(e.status)}</span></div><div class="runmeta">${money(e.amount)} · Evento #${e.id}${e.reference ? " · Ref. " + escapeHtml(e.reference) : ""} · ${escapeHtml(e.time)}</div></div>`).join("")
+    : '<div class="empty">Esperando movimientos de las CVU.</div>';
+}
+
+function renderOrders() {
+  $("runs").innerHTML = orders.length
+    ? orders.map((o) => `<div class="run"><div class="runhead"><span>${money(o.amount)} netos · ${escapeHtml(o.type)} externa</span><span class="status ${o.status === "Pendiente" ? "pending" : o.status === "Parcial" ? "partial" : o.status === "Rechazada" ? "failed" : ""}">${escapeHtml(o.status)}</span></div><div class="runmeta">${escapeHtml(o.beneficiary)} · ${escapeHtml(o.destination.slice(0, 6))}····${escapeHtml(o.destination.slice(-4))} · ${o.parts.length} transferencias · costo ${money(o.fees)} · débito ${money(o.amount + o.fees)} · ${escapeHtml(o.time)}</div><details><summary class="hint" style="cursor:pointer;margin-top:8px">Ver descuento específico por CVU</summary><div class="detail">${o.parts.map((p) => `<div><span>CVU ${String(p.id).padStart(4, "0")} · envío ${money(p.amount)} + costo ${money(p.fee)}</span><b>Débito ${money(p.amount + p.fee)} · ${escapeHtml(p.status)}</b></div>`).join("")}</div></details></div>`).join("")
+    : '<div class="empty">Todavía no hay órdenes.</div>';
+}
+
+function render() {
+  const sum = accounts.reduce((s, a) => s + a.balance, 0);
+  const receiverSum = accounts.filter((a) => a.group === "receiver").reduce((s, a) => s + a.balance, 0);
+  const q = $("search").value.trim().toLowerCase();
+  const filter = $("filter").value;
+  const visible = accounts.filter((a) => (!q || String(a.id).padStart(4, "0").includes(q) || a.cvu.includes(q)) && (filter === "all" || (filter === "active" ? a.balance > 0 : a.balance === 0)));
+  $("total").textContent = money(sum);
+  $("receiverTotal").textContent = money(receiverSum);
+  $("payerTotal").textContent = money(sum - receiverSum);
+  $("orders").textContent = orders.length;
+  for (const group of ["payer", "receiver"]) {
+    const list = visible.filter((a) => a.group === group);
+    $(group + "Shown").textContent = `Mostrando ${list.length} de ${group === "payer" ? 300 : 700} CVU.`;
+    $(group + "Rows").innerHTML = list.map((a) => `<tr><td><strong>CVU ${String(a.id).padStart(4, "0")}</strong></td><td>${a.cvu.slice(0, 8)} ···· ${a.cvu.slice(-4)}</td><td class="money">${money(a.balance)}<div class="bar"><i style="width:${(a.balance / MAX) * 100}%"></i></div></td><td><span class="dot ${a.balance === 0 ? "off" : ""}"></span>${a.balance ? "Disponible" : "Sin saldo"}</td></tr>`).join("") || '<tr><td colspan="4" class="empty">No hay CVU para ese filtro.</td></tr>';
+  }
+  renderOrders();
+  renderEvents();
+}
+
+function preview() {
+  const amount = amountValue();
+  const fee = feeValue();
+  const validFee = Number.isSafeInteger(fee) && fee >= 0;
+  if (!currentPlan || currentPlan.amount !== amount || currentPlan.fee !== fee) currentPlan = { amount, fee, ...allocation(amount, validFee ? fee : 0) };
+  const plan = currentPlan;
+  const fees = plan.parts.length * (validFee ? fee : 0);
+  const payerTotal = accounts.filter((a) => a.group === "payer").reduce((s, a) => s + a.balance, 0);
+  $("previewAmount").textContent = money(amount);
+  $("sourceCount").textContent = amount ? plan.parts.length : 0;
+  $("transferCount").textContent = amount ? plan.parts.length : 0;
+  $("totalFees").textContent = money(fees);
+  $("totalDebit").textContent = money(amount + fees);
+  $("remaining").textContent = money(Math.max(0, payerTotal - amount - fees));
+  $("planParts").innerHTML = plan.parts.slice(0, 20).map((p) => `<div><span>CVU ${String(p.id).padStart(4, "0")} · envío ${money(p.amount)} + costo ${money(fee)}</span><b>Débito ${money(p.amount + fee)}</b></div>`).join("") || "<div>Ingresá un importe para ver el reparto.</div>";
+  $("partsTotal").textContent = money(plan.parts.reduce((s, p) => s + p.amount, 0));
+  $("error").textContent = !validFee ? "Ingresá un costo válido, de cero pesos o más." : amount && plan.left > 0 ? "No hay saldo suficiente en CVU pagadoras elegibles." : "";
+  $("pay").disabled = pending || !validFee || !!(amount && plan.left > 0);
+}
+
+async function reload() {
+  const [acc, ord, ev] = await Promise.all([
+    db.from("cvu_accounts").select("id,group_name,cvu,balance").order("id"),
+    db.from("payment_orders").select("id,amount,fees,destination,beneficiary,dest_type,status,created_at,order_parts(account_id,amount,fee,status)").order("id", { ascending: false }).limit(40),
+    db.from("controller_events").select("id,account_id,direction,amount,status,reference,created_at").order("id", { ascending: false }).limit(40)
+  ]);
+  if (acc.error) throw acc.error;
+  if (ord.error) throw ord.error;
+  if (ev.error) throw ev.error;
+  accounts = acc.data.map((a) => ({ id: a.id, group: a.group_name, cvu: a.cvu, balance: Number(a.balance) }));
+  orders = ord.data.map((o) => ({
+    amount: Number(o.amount),
+    fees: Number(o.fees),
+    destination: o.destination,
+    beneficiary: o.beneficiary,
+    type: o.dest_type,
+    status: o.status,
+    time: new Date(o.created_at).toLocaleString("es-AR"),
+    parts: (o.order_parts || []).map((p) => ({ id: p.account_id, amount: Number(p.amount), fee: Number(p.fee), status: p.status }))
+  }));
+  events = ev.data.map((e) => ({
+    id: e.id,
+    account: e.account_id,
+    direction: e.direction,
+    amount: Number(e.amount),
+    status: e.status,
+    reference: e.reference || "",
+    time: new Date(e.created_at).toLocaleTimeString("es-AR")
+  }));
+  currentPlan = null;
+  render();
+  preview();
+}
+
+function explain(error) {
+  return error?.message || "No se pudo guardar en la base.";
+}
+
+async function pay() {
+  const amount = amountValue();
+  const fee = feeValue();
+  const destination = $("destination").value.replace(/\s/g, "");
+  const beneficiary = $("beneficiary").value.trim();
+  const plan = currentPlan;
+  if (pending) return;
+  if (!amount) { $("error").textContent = "Ingresá un importe mayor a cero."; return; }
+  if (!/^\d{22}$/.test(destination)) { $("error").textContent = "Ingresá una CVU o CBU de 22 dígitos."; return; }
+  if (!beneficiary) { $("error").textContent = "Ingresá el titular o referencia del beneficiario."; return; }
+  if (!plan || plan.amount !== amount || plan.fee !== fee || plan.left > 0 || plan.parts.reduce((s, p) => s + p.amount, 0) !== amount) {
+    $("error").textContent = "No se pudo armar un reparto válido. Generá otro reparto.";
+    return;
+  }
+  pending = true;
+  preview();
+  const { error } = await db.rpc("apply_payment", {
+    p_destination: destination,
+    p_beneficiary: beneficiary,
+    p_type: $("type").value,
+    p_fee: fee,
+    p_parts: plan.parts.map((p) => ({ id: p.id, amount: p.amount }))
+  });
+  pending = false;
+  if (error) { $("error").textContent = explain(error); preview(); return; }
+  $("error").textContent = "";
+  await reload();
+}
+
+async function fund() {
+  const fee = feeValue();
+  if (!Number.isSafeInteger(fee) || fee < 0) { $("fundMessage").textContent = "Ingresá un costo por transferencia válido."; return; }
+  const { data, error } = await db.rpc("fund_payer", { p_fee: fee });
+  if (error) { $("fundMessage").textContent = explain(error); return; }
+  $("fundMessage").textContent = `${data.reference}: CVU ${String(data.from_id).padStart(4, "0")} → CVU ${String(data.to_id).padStart(4, "0")} · recibe ${money(data.amount)} · costo ${money(data.fee)} · débito ${money(Number(data.amount) + Number(data.fee))}.`;
+  await reload();
+}
+
+async function incoming() {
+  const { error } = await db.rpc("record_incoming");
+  if (error) { $("error").textContent = explain(error); return; }
+  await reload();
+}
+
+async function resetBook() {
+  if (!confirm("Esto borra órdenes y avisos, y vuelve los saldos al punto de partida.")) return;
+  const { error } = await db.rpc("reset_battery");
+  if (error) { $("error").textContent = explain(error); return; }
+  $("fundMessage").textContent = "Sin asignación permanente entre cuentas.";
+  await reload();
+}
+
+const viewConfig = {
+  overview: { title: "CVU independientes en una vista", subtitle: "1.000 CVU · saldos individuales hasta $500.000 · sin cuenta agrupadora", panels: ["accountPanel", "paymentPanel", "fundingPanel", "eventsPanel", "ordersPanel"], cards: true },
+  accounts: { title: "Cuentas CVU", subtitle: "Explorá por grupo, número de cuenta, CVU y saldo.", panels: ["accountPanel"], cards: false },
+  orders: { title: "Órdenes de pago", subtitle: "Prepará pagos externos y seguí el estado de cada transferencia.", panels: ["paymentPanel", "ordersPanel"], cards: false },
+  reconciliation: { title: "Conciliación", subtitle: "Seguí fondeos, avisos por CVU y resultados de las órdenes.", panels: ["fundingPanel", "eventsPanel", "ordersPanel"], cards: false },
+  promoters: { title: "Promotores", subtitle: "El alta la hace el admin. El cliente no tiene usuario y el libro no lista estas fichas.", panels: ["promoterPanel"], cards: false }
+};
+
+async function loadPromoters() {
+  const { data, error } = await db.from("promoters").select("email, created_at").order("created_at", { ascending: false });
+  if (error) { $("promoterList").innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`; return; }
+  $("promoterList").innerHTML = (data || []).length
+    ? data.map((p) => `<div class="run"><div class="runhead"><span>${escapeHtml(p.email)}</span></div><div class="runmeta">${escapeHtml(new Date(p.created_at).toLocaleString("es-AR"))}</div></div>`).join("")
+    : '<div class="empty">Todavía no hay promotores.</div>';
+}
+
+async function addPromoter() {
+  $("promoterError").textContent = "";
+  const email = $("promoterEmail").value.trim().toLowerCase();
+  const password = $("promoterPassword").value;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.length < 8) {
+    $("promoterError").textContent = "Hace falta un correo y una contraseña de al menos 8 caracteres.";
+    return;
+  }
+  const { data: sessionData } = await db.auth.getSession();
+  const token = sessionData.session?.access_token;
+  if (!token) { $("promoterError").textContent = "Tenés que entrar como admin."; return; }
+  const response = await fetch(`${cfg.url}/functions/v1/promoter-admin`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, apikey: cfg.anonKey },
+    body: JSON.stringify({ email, password })
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) { $("promoterError").textContent = payload.error || "No se pudo crear el promotor."; return; }
+  $("promoterEmail").value = "";
+  $("promoterPassword").value = "";
+  await loadPromoters();
+}
+
+function setView(view) {
+  if (!viewConfig[view]) view = "overview";
+  const config = viewConfig[view];
+  $("viewTitle").textContent = config.title;
+  $("viewSubtitle").textContent = config.subtitle;
+  $("overviewCards").classList.toggle("view-hidden", !config.cards);
+  for (const id of ["accountPanel", "promoterPanel", "paymentPanel", "fundingPanel", "eventsPanel", "ordersPanel"]) $(id).classList.toggle("view-hidden", !config.panels.includes(id));
+  $("workspace").classList.toggle("single", view !== "overview" && view !== "promoters");
+  $("workspace").classList.toggle("accounts-view", view === "accounts");
+  $("workspace").classList.toggle("promoters-view", view === "promoters");
+  if (view === "promoters") loadPromoters().catch((error) => { $("promoterError").textContent = explain(error); });
+  for (const button of document.querySelectorAll(".nav")) {
+    const active = button.dataset.view === view;
+    button.classList.toggle("active", active);
+    if (active) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
+  }
+  history.replaceState(null, "", "#" + view);
+}
+
+async function showApp(session) {
+  const { data, error } = await db.from("admins").select("email").eq("user_id", session.user.id).maybeSingle();
+  if (error || !data) {
+    $("loginError").textContent = "Esta sesión no es admin. Solo matchsystem@proton.me tiene acceso.";
+    await db.auth.signOut();
+    return;
+  }
+  $("gate").classList.add("view-hidden");
+  $("app").classList.remove("view-hidden");
+  $("who").textContent = data.email;
+  await reload();
+  setView(location.hash.slice(1) || "overview");
+}
+
+async function enter(create) {
+  $("loginError").textContent = "";
+  if (!db) { $("loginError").textContent = "Falta la clave pública de Supabase en config.js."; return; }
+  const email = $("email").value.trim();
+  const password = $("password").value;
+  if (!email || password.length < 8) { $("loginError").textContent = "Usá el correo de admin y una contraseña de al menos 8 caracteres."; return; }
+  const result = create
+    ? await db.auth.signUp({ email, password })
+    : await db.auth.signInWithPassword({ email, password });
+  if (result.error) { $("loginError").textContent = result.error.message; return; }
+  if (!result.data.session) { $("loginError").textContent = "Revisá el correo y confirmá el acceso. Después entrá con la misma contraseña."; return; }
+  await showApp(result.data.session);
+}
+
+for (const button of document.querySelectorAll(".nav")) button.addEventListener("click", () => setView(button.dataset.view));
+window.addEventListener("hashchange", () => setView(location.hash.slice(1)));
+$("search").addEventListener("input", render);
+$("filter").addEventListener("change", render);
+for (const id of ["amount", "fee"]) $(id).addEventListener("input", () => { currentPlan = null; preview(); });
+$("reroll").addEventListener("click", () => { currentPlan = null; preview(); });
+$("pay").addEventListener("click", () => pay().catch((error) => { $("error").textContent = explain(error); pending = false; }));
+$("incoming").addEventListener("click", () => incoming().catch((error) => { $("error").textContent = explain(error); }));
+$("fund").addEventListener("click", () => fund().catch((error) => { $("fundMessage").textContent = explain(error); }));
+$("reset").addEventListener("click", () => resetBook().catch((error) => { $("error").textContent = explain(error); }));
+$("signIn").addEventListener("click", () => enter(false));
+$("signUp").addEventListener("click", () => enter(true));
+$("signOut").addEventListener("click", async () => { await db.auth.signOut(); location.reload(); });
+$("addPromoter").addEventListener("click", () => addPromoter().catch((error) => { $("promoterError").textContent = explain(error); }));
+
+if (!db) $("loginError").textContent = "Falta la clave pública de Supabase en config.js.";
+else {
+  const { data } = await db.auth.getSession();
+  if (data.session) await showApp(data.session);
+}
+</script>
+</body>
+</html>
