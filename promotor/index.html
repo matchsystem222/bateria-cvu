@@ -49,6 +49,7 @@
         <button class="secondary" id="signOut" type="button">Salir</button>
       </div>
       <p class="muted">La ficha queda en la batería hasta que se cree la CVU. En el listado solo ves el nombre y si pasó.</p>
+      <p class="muted" id="deviceHint"></p>
       <button class="primary" id="start" type="button">Nueva entrevista</button>
       <form class="panel hidden" id="confirmForm">
         <div class="eyebrow" style="font-size:12px;font-weight:800;letter-spacing:.08em;color:#65768e">CONFIRMAR DATOS</div>
@@ -63,6 +64,12 @@
       <div class="panel" id="list"></div>
     </section>
   </main>
+  <script>
+    if (new URLSearchParams(location.search).get("resume")) {
+      document.getElementById("gate").classList.add("hidden");
+      document.getElementById("app").classList.remove("hidden");
+    }
+  </script>
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
     const cfg = window.BATERIA_CONFIG || {};
@@ -100,6 +107,12 @@
     }
 
     async function openConfirm(caseId) {
+      const token = (await db.auth.getSession()).data.session?.access_token;
+      await fetch(`${cfg.url}/functions/v1/didit-session`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, apikey: cfg.anonKey, "Content-Type": "application/json" },
+        body: JSON.stringify({ case_id: caseId, refresh: true })
+      });
       const { data, error } = await db.rpc("capture_preview", { p_case: caseId });
       if (error) { $("appError").textContent = error.message; return; }
       if (data.confirmed) { $("confirmForm").classList.add("hidden"); return; }
@@ -176,6 +189,29 @@
     $("confirmForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       $("confirmError").textContent = "";
+      const resumeToken = $("confirmForm").dataset.resume;
+      if (resumeToken) {
+        const response = await fetch(`${cfg.url}/functions/v1/didit-session`, {
+          method: "POST",
+          headers: { apikey: cfg.anonKey, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            case_id: $("confirmForm").dataset.case,
+            resume: resumeToken,
+            confirm: true,
+            first_name: $("firstName").value,
+            last_name: $("lastName").value,
+            dni: $("dni").value
+          })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) { $("confirmError").textContent = payload.error || "No se pudo guardar"; return; }
+        $("confirmForm").classList.add("hidden");
+        $("dni").value = "";
+        const verdictText = payload.apt_for_cvu ? "Quedó válido para crear CVU." : "No quedó listo para aprobación.";
+        const why = (payload.failure_reasons || []).join(". ");
+        $("list").innerHTML = `<p class="name">${esc(payload.first_name || "")} ${esc(payload.last_name || "")}</p><p class="muted">${esc(verdictText)}${why ? " " + esc(why) : ""}</p>`;
+        return;
+      }
       const { error } = await db.rpc("confirm_capture", {
         p_case: $("confirmForm").dataset.case,
         p_first: $("firstName").value,
@@ -194,7 +230,52 @@
       if (confirmId) openConfirm(confirmId);
     });
 
+    const params = new URLSearchParams(location.search);
+    const returnCase = params.get("case");
+    const resume = params.get("resume");
+    const phone = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent) || window.matchMedia("(max-width: 820px)").matches;
+    if ($("deviceHint")) {
+      $("deviceHint").textContent = phone
+        ? "Estás en el teléfono. Al terminar la verificación, esta misma pantalla abre el formulario de nombre, apellido y DNI."
+        : "Si la verificación sigue en el teléfono, al terminar el teléfono abre el formulario de nombre, apellido y DNI. No vuelve a pedir el acceso.";
+    }
+
+    async function returnFromDidit() {
+      $("gate").classList.add("hidden");
+      $("app").classList.remove("hidden");
+      $("start").classList.add("hidden");
+      $("confirmForm").classList.remove("hidden");
+      $("confirmForm").dataset.case = returnCase;
+      $("confirmForm").dataset.resume = resume;
+      $("confirmError").textContent = "Buscando lo que leyó el documento…";
+      for (let i = 0; i < 20; i++) {
+        const response = await fetch(`${cfg.url}/functions/v1/didit-session`, {
+          method: "POST",
+          headers: { apikey: cfg.anonKey, "Content-Type": "application/json" },
+          body: JSON.stringify({ case_id: returnCase, resume, refresh: true })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) { $("confirmError").textContent = payload.error || "No se pudo abrir la confirmación"; return; }
+        if (payload.confirmed) {
+          $("confirmForm").classList.add("hidden");
+          $("confirmError").textContent = "";
+          $("list").innerHTML = `<p class="muted">${esc(payload.first_name || "")} ${esc(payload.last_name || "")} ya estaba confirmado.</p>`;
+          return;
+        }
+        if (payload.first_name || payload.last_name || payload.document_number || !["Not Started", "In Progress", ""].includes(payload.status || "")) {
+          $("firstName").value = payload.first_name || "";
+          $("lastName").value = payload.last_name || "";
+          $("dni").value = payload.document_number || "";
+          $("confirmError").textContent = (payload.failure_reasons || []).join(". ");
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+      }
+      $("confirmError").textContent = "La verificación todavía no devolvió el nombre. Esperá un momento y recargá esta pantalla.";
+    }
+
     if (!db) $("loginError").textContent = "Falta la configuración.";
+    else if (returnCase && resume) await returnFromDidit();
     else {
       const { data } = await db.auth.getSession();
       if (data.session) await showApp();

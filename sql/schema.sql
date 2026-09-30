@@ -363,8 +363,11 @@ create table if not exists public.onboarding_cases (
   failure_reasons text[] not null default '{}',
   confirmed_at timestamptz,
   didit_session_id text,
+  resume_hash text,
   created_at timestamptz not null default now()
 );
+
+alter table public.onboarding_cases add column if not exists resume_hash text;
 
 create table if not exists public.kyc_dossiers (
   session_id text primary key,
