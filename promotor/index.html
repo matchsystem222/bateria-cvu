@@ -17,6 +17,7 @@
     input{border:1px solid #dce5ee;border-radius:10px;padding:12px;width:100%}
     .primary{border:0;background:#0d9f78;color:#fff;padding:14px 16px;border-radius:12px;font-weight:800;width:100%;margin-top:14px}
     .primary:disabled{opacity:.5}
+    button{min-height:48px;position:relative;z-index:1}
     .secondary{border:1px solid #dce5ee;background:#fff;color:#26394d;padding:12px 14px;border-radius:12px;font-weight:700}
     .error{color:#b03636;font-size:13px;min-height:18px;margin-top:8px}
     .case{border-top:1px solid #eef2f5;padding:14px 0}
@@ -46,24 +47,27 @@
     <section id="app" class="hidden">
       <div class="row" style="margin-top:14px">
         <h1 style="margin:0">Entrevistas</h1>
+        <button class="secondary" id="back" type="button" hidden>Volver</button>
         <button class="secondary" id="signOut" type="button">Salir</button>
       </div>
+      <div id="home">
       <p class="muted">La ficha queda en la batería hasta que se cree la CVU. En el listado solo ves el nombre y si pasó.</p>
       <p class="muted" id="deviceHint"></p>
       <button class="primary" id="start" type="button">Nueva entrevista</button>
       <button class="secondary" id="showCases" type="button" style="width:100%;margin-top:10px">Ver casos procesados</button>
+      <div class="error" id="appError"></div>
+      <div class="panel" id="list"></div>
+      </div>
       <div class="panel hidden" id="cases"></div>
-      <form class="panel hidden" id="confirmForm">
+      <form class="panel hidden" id="confirmForm" novalidate>
         <div class="eyebrow" style="font-size:12px;font-weight:800;letter-spacing:.08em;color:#65768e">CONFIRMAR DATOS</div>
-        <p class="muted">Revisá lo que leyó el documento. Si el nombre o el DNI quedaron cortados, corregilos antes de terminar.</p>
+        <p class="muted">Didit ya verificó el documento. El promotor confirma el nombre, el apellido y el DNI. Al guardar, si la verificación fue aprobada, el caso pasa a exitosos.</p>
         <label>Nombre<input id="firstName" autocomplete="off" required></label>
         <label>Apellido<input id="lastName" autocomplete="off" required></label>
         <label>DNI<input id="dni" inputmode="numeric" autocomplete="off" required></label>
         <div class="error" id="confirmError"></div>
-        <button class="primary" type="submit">Confirmar y guardar en la batería</button>
+        <button class="primary" type="submit">Confirmar y guardar</button>
       </form>
-      <div class="error" id="appError"></div>
-      <div class="panel" id="list"></div>
     </section>
   </main>
   <script>
@@ -104,7 +108,7 @@
       const reasons = (item.failure_reasons || []).map((reason) => `<li>${esc(reason)}</li>`).join("");
       const retry = ["Declined", "Resubmitted", "Abandoned", "Expired", "Kyc Expired"].includes(item.didit_status)
         ? `<button class="secondary" data-retry="${item.id}" type="button" style="margin-top:8px">Repetir captura</button>` : "";
-      const fix = pending ? `<button class="secondary" data-confirm="${item.id}" type="button" style="margin-top:8px">Corregir datos</button>` : "";
+      const fix = pending ? `<button class="primary" data-confirm="${item.id}" type="button" style="margin-top:8px">Confirmar datos</button>` : "";
       return `<article class="case"><div class="row"><div class="name">${esc(name)}</div><span class="pill ${kind}">${esc(text)}</span></div>${reasons ? `<ul class="why">${reasons}</ul>` : ""}${fix}${retry}</article>`;
     }
 
@@ -123,8 +127,7 @@
       $("lastName").value = data.last_name || "";
       $("dni").value = data.document_number || "";
       $("confirmError").textContent = "";
-      $("confirmForm").classList.remove("hidden");
-      $("confirmForm").scrollIntoView({ behavior: "smooth" });
+      showScreen("confirm");
     }
 
     function processed(item) {
@@ -144,8 +147,17 @@
       const rows = data || [];
       const ok = rows.filter((item) => processed(item) === "ok");
       const bad = rows.filter((item) => processed(item) === "bad");
-      $("cases").innerHTML = caseGroup("Exitosos", ok) + caseGroup("Fallidos", bad);
-      $("cases").classList.remove("hidden");
+      const waiting = rows.filter((item) => item.didit_status === "Approved" && !item.confirmed_at);
+      $("cases").innerHTML = caseGroup("Para confirmar", waiting) + caseGroup("Exitosos", ok) + caseGroup("Fallidos", bad);
+      showScreen("cases");
+    }
+
+    function showScreen(screen) {
+      $("home").classList.toggle("hidden", screen !== "home");
+      $("cases").classList.toggle("hidden", screen !== "cases");
+      $("confirmForm").classList.toggle("hidden", screen !== "confirm");
+      $("back").hidden = screen === "home";
+      if (screen !== "confirm") $("dni").value = "";
     }
 
     async function load() {
@@ -212,6 +224,7 @@
     $("signOut").addEventListener("click", async () => { await db.auth.signOut(); location.href = location.pathname; });
     $("start").addEventListener("click", () => begin());
     $("showCases").addEventListener("click", () => loadCases().catch((error) => { $("appError").textContent = error.message; }));
+    $("back").addEventListener("click", () => { showScreen("home"); load().catch((error) => { $("appError").textContent = error.message; }); });
     $("confirmForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       $("confirmError").textContent = "";
@@ -231,11 +244,8 @@
         });
         const payload = await response.json().catch(() => ({}));
         if (!response.ok) { $("confirmError").textContent = payload.error || "No se pudo guardar"; return; }
-        $("confirmForm").classList.add("hidden");
-        $("dni").value = "";
-        const verdictText = payload.apt_for_cvu ? "Quedó válido para crear CVU." : "No quedó listo para aprobación.";
-        const why = (payload.failure_reasons || []).join(". ");
-        $("list").innerHTML = `<p class="name">${esc(payload.first_name || "")} ${esc(payload.last_name || "")}</p><p class="muted">${esc(verdictText)}${why ? " " + esc(why) : ""}</p>`;
+        showScreen("home");
+        await loadCases();
         return;
       }
       const { error } = await db.rpc("confirm_capture", {
@@ -245,15 +255,14 @@
         p_dni: $("dni").value
       });
       if (error) { $("confirmError").textContent = error.message; return; }
-      $("confirmForm").classList.add("hidden");
-      $("dni").value = "";
-      await load();
+      showScreen("home");
+      await loadCases();
     });
-    $("list").addEventListener("click", (event) => {
-      const retry = event.target?.dataset?.retry;
-      const confirmId = event.target?.dataset?.confirm;
-      if (retry) begin(retry);
-      if (confirmId) openConfirm(confirmId);
+    $("app").addEventListener("click", (event) => {
+      const button = event.target.closest("button");
+      if (!button || button.id === "showCases" || button.id === "start" || button.id === "back" || button.id === "signOut") return;
+      if (button.dataset.retry) begin(button.dataset.retry);
+      if (button.dataset.confirm) openConfirm(button.dataset.confirm);
     });
 
     const params = new URLSearchParams(location.search);
@@ -269,8 +278,7 @@
     async function returnFromDidit() {
       $("gate").classList.add("hidden");
       $("app").classList.remove("hidden");
-      $("start").classList.add("hidden");
-      $("confirmForm").classList.remove("hidden");
+      showScreen("confirm");
       $("confirmForm").dataset.case = returnCase;
       $("confirmForm").dataset.resume = resume;
       $("confirmError").textContent = "Buscando lo que leyó el documento…";
