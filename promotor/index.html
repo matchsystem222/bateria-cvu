@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Onboarding · Batería CVU</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>Promotor · Batería CVU</title>
   <style>
     :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17243a;background:#f3f6fa}
     *{box-sizing:border-box}body{margin:0}button,input{font:inherit}button{cursor:pointer}
@@ -33,11 +34,11 @@
   <main class="wrap">
     <div class="brand">Batería<b>CVU</b></div>
     <section id="gate">
-      <h1>Onboarding</h1>
-      <p class="muted">Acompañás a la persona en la entrevista. Acá solo ves el nombre y si quedó válido para crear una CVU.</p>
-      <form class="panel" id="loginForm">
-        <label>Usuario<input id="email" autocomplete="username" required></label>
-        <label>Contraseña<input id="password" type="password" autocomplete="current-password" required></label>
+      <h1>Promotor</h1>
+      <p class="muted">Entrá con tu usuario, por ejemplo Promotor01. No es un correo. La persona entrevistada no tiene cuenta.</p>
+      <form class="panel" id="loginForm" novalidate>
+        <label>Usuario<input id="username" name="username" type="text" inputmode="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Promotor01" required></label>
+        <label>Contraseña<input id="password" name="password" type="password" autocomplete="current-password" required></label>
         <div class="error" id="loginError"></div>
         <button class="primary" type="submit">Entrar</button>
       </form>
@@ -163,10 +164,11 @@
       event.preventDefault();
       $("loginError").textContent = "";
       if (!db) { $("loginError").textContent = "Falta la configuración."; return; }
-      const typed = $("email").value.trim();
-      const account = typed.includes("@") ? typed.toLowerCase() : `${typed.toLowerCase()}@users.bateria-cvu.invalid`;
+      const typed = $("username").value.trim();
+      if (typed.includes("@")) { $("loginError").textContent = "Ese campo es el usuario del promotor, no un correo."; return; }
+      const account = `${typed.toLowerCase()}@users.bateria-cvu.invalid`;
       const { data, error } = await db.auth.signInWithPassword({ email: account, password: $("password").value });
-      if (error || !data.session) { $("loginError").textContent = error?.message || "No se pudo entrar"; return; }
+      if (error || !data.session) { $("loginError").textContent = "Usuario o contraseña incorrectos."; return; }
       await showApp();
     });
     $("signOut").addEventListener("click", async () => { await db.auth.signOut(); location.href = location.pathname; });
