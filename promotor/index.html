@@ -51,6 +51,8 @@
       <p class="muted">La ficha queda en la batería hasta que se cree la CVU. En el listado solo ves el nombre y si pasó.</p>
       <p class="muted" id="deviceHint"></p>
       <button class="primary" id="start" type="button">Nueva entrevista</button>
+      <button class="secondary" id="showCases" type="button" style="width:100%;margin-top:10px">Ver casos procesados</button>
+      <div class="panel hidden" id="cases"></div>
       <form class="panel hidden" id="confirmForm">
         <div class="eyebrow" style="font-size:12px;font-weight:800;letter-spacing:.08em;color:#65768e">CONFIRMAR DATOS</div>
         <p class="muted">Revisá lo que leyó el documento. Si el nombre o el DNI quedaron cortados, corregilos antes de terminar.</p>
@@ -125,10 +127,33 @@
       $("confirmForm").scrollIntoView({ behavior: "smooth" });
     }
 
+    function processed(item) {
+      if (item.apt_for_cvu) return "ok";
+      if (item.confirmed_at || ["Declined", "Resubmitted", "Abandoned", "Expired", "Kyc Expired"].includes(item.didit_status)) return "bad";
+      return "";
+    }
+
+    function caseGroup(title, items) {
+      const body = items.length ? items.map(row).join("") : `<p class="muted">Ninguno.</p>`;
+      return `<h2 style="font-size:16px;margin:8px 0">${title} · ${items.length}</h2>${body}`;
+    }
+
+    async function loadCases() {
+      const { data, error } = await db.from("onboarding_cases").select("id, first_name, last_name, didit_status, apt_for_cvu, failure_reasons, confirmed_at, created_at").order("created_at", { ascending: false });
+      if (error) { $("appError").textContent = error.message; return; }
+      const rows = data || [];
+      const ok = rows.filter((item) => processed(item) === "ok");
+      const bad = rows.filter((item) => processed(item) === "bad");
+      $("cases").innerHTML = caseGroup("Exitosos", ok) + caseGroup("Fallidos", bad);
+      $("cases").classList.remove("hidden");
+    }
+
     async function load() {
       const { data, error } = await db.from("onboarding_cases").select("id, first_name, last_name, didit_status, apt_for_cvu, failure_reasons, confirmed_at, created_at").order("created_at", { ascending: false });
       if (error) { $("appError").textContent = error.message; return; }
-      $("list").innerHTML = (data || []).map(row).join("") || `<p class="muted">Todavía no hay entrevistas.</p>`;
+      const pending = (data || []).filter((item) => !processed(item));
+      $("list").innerHTML = pending.map(row).join("") || `<p class="muted">No hay entrevistas en curso.</p>`;
+      if (!$("cases").classList.contains("hidden")) await loadCases();
     }
 
     async function begin(caseId) {
@@ -186,6 +211,7 @@
     });
     $("signOut").addEventListener("click", async () => { await db.auth.signOut(); location.href = location.pathname; });
     $("start").addEventListener("click", () => begin());
+    $("showCases").addEventListener("click", () => loadCases().catch((error) => { $("appError").textContent = error.message; }));
     $("confirmForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       $("confirmError").textContent = "";
