@@ -358,6 +358,7 @@ create table if not exists public.onboarding_cases (
   apt_for_cvu boolean not null default false,
   failure_reasons text[] not null default '{}',
   confirmed_at timestamptz,
+  didit_session_id text,
   created_at timestamptz not null default now()
 );
 

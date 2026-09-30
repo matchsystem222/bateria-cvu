@@ -146,6 +146,11 @@
       const caseId = new URLSearchParams(location.search).get("case");
       if (caseId) {
         for (let i = 0; i < 20; i++) {
+          await fetch(`${cfg.url}/functions/v1/didit-session`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${(await db.auth.getSession()).data.session?.access_token}`, apikey: cfg.anonKey, "Content-Type": "application/json" },
+            body: JSON.stringify({ case_id: caseId, refresh: true })
+          });
           await load();
           const { data } = await db.from("onboarding_cases").select("didit_status").eq("id", caseId).maybeSingle();
           if (data && !["Not Started", "In Progress"].includes(data.didit_status)) { await openConfirm(caseId); break; }
