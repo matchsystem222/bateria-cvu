@@ -346,8 +346,12 @@ grant execute on function public.apply_payment(text, text, text, bigint, jsonb) 
 create table if not exists public.promoters (
   user_id uuid primary key references auth.users (id) on delete cascade,
   email text not null unique,
+  login text,
   created_at timestamptz not null default now()
 );
+
+alter table public.promoters add column if not exists login text;
+create unique index if not exists promoters_login_key on public.promoters (lower(login));
 
 create table if not exists public.onboarding_cases (
   id uuid primary key default gen_random_uuid(),

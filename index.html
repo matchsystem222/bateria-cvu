@@ -74,7 +74,7 @@
         <h2>Alta de promotor</h2>
         <p class="muted">El promotor solo ve nombre, veredicto y motivo. El expediente queda en el servidor.</p>
         <div class="fields">
-          <label>Correo del promotor<input id="promoterEmail" type="email" autocomplete="off"></label>
+          <label>Usuario del promotor<input id="promoterEmail" autocomplete="off"></label>
           <label>Contraseña inicial<input id="promoterPassword" type="password" autocomplete="new-password"></label>
         </div>
         <div class="error" id="promoterError"></div>
@@ -342,19 +342,19 @@ const viewConfig = {
 };
 
 async function loadPromoters() {
-  const { data, error } = await db.from("promoters").select("email, created_at").order("created_at", { ascending: false });
+  const { data, error } = await db.from("promoters").select("login, email, created_at").order("created_at", { ascending: false });
   if (error) { $("promoterList").innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`; return; }
   $("promoterList").innerHTML = (data || []).length
-    ? data.map((p) => `<div class="run"><div class="runhead"><span>${escapeHtml(p.email)}</span></div><div class="runmeta">${escapeHtml(new Date(p.created_at).toLocaleString("es-AR"))}</div></div>`).join("")
+    ? data.map((p) => `<div class="run"><div class="runhead"><span>${escapeHtml(p.login || p.email)}</span></div><div class="runmeta">${escapeHtml(new Date(p.created_at).toLocaleString("es-AR"))}</div></div>`).join("")
     : '<div class="empty">Todavía no hay promotores.</div>';
 }
 
 async function addPromoter() {
   $("promoterError").textContent = "";
-  const email = $("promoterEmail").value.trim().toLowerCase();
+  const login = $("promoterEmail").value.trim();
   const password = $("promoterPassword").value;
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.length < 8) {
-    $("promoterError").textContent = "Hace falta un correo y una contraseña de al menos 8 caracteres.";
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]{1,31}$/.test(login) || password.length < 8) {
+    $("promoterError").textContent = "Hace falta un usuario y una contraseña de al menos 8 caracteres.";
     return;
   }
   const { data: sessionData } = await db.auth.getSession();
@@ -363,7 +363,7 @@ async function addPromoter() {
   const response = await fetch(`${cfg.url}/functions/v1/promoter-admin`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, apikey: cfg.anonKey },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({ login, password })
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) { $("promoterError").textContent = payload.error || "No se pudo crear el promotor."; return; }

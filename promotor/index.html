@@ -36,7 +36,7 @@
       <h1>Onboarding</h1>
       <p class="muted">Acompañás a la persona en la entrevista. Acá solo ves el nombre y si quedó válido para crear una CVU.</p>
       <form class="panel" id="loginForm">
-        <label>Correo<input id="email" type="email" autocomplete="username" required></label>
+        <label>Usuario<input id="email" autocomplete="username" required></label>
         <label>Contraseña<input id="password" type="password" autocomplete="current-password" required></label>
         <div class="error" id="loginError"></div>
         <button class="primary" type="submit">Entrar</button>
@@ -163,7 +163,9 @@
       event.preventDefault();
       $("loginError").textContent = "";
       if (!db) { $("loginError").textContent = "Falta la configuración."; return; }
-      const { data, error } = await db.auth.signInWithPassword({ email: $("email").value.trim(), password: $("password").value });
+      const typed = $("email").value.trim();
+      const account = typed.includes("@") ? typed.toLowerCase() : `${typed.toLowerCase()}@users.bateria-cvu.invalid`;
+      const { data, error } = await db.auth.signInWithPassword({ email: account, password: $("password").value });
       if (error || !data.session) { $("loginError").textContent = error?.message || "No se pudo entrar"; return; }
       await showApp();
     });
